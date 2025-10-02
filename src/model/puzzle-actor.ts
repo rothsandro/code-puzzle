@@ -36,7 +36,7 @@ export const puzzleMachine = setup({
         p.id,
         {
           x: -CANVAS_OFF_WIDTH + CANVAS_OFF_PADDING,
-          y: CANVAS_OFF_PADDING + getRelativeInitialPosition(list.length, idx),
+          y: getRelativeInitialPosition(list.length, idx),
         },
       ])
     ),
