@@ -68,6 +68,9 @@ const machine = setup({
         `translate(${ctx.context.offset.x}px, ${ctx.context.offset.y}px)`
       );
     },
+
+    applySelectNone: () => document.body.classList.add("select-none"),
+    removeSelectNone: () => document.body.classList.remove("select-none"),
   },
   actors: { moveObserver },
 }).createMachine({
@@ -95,6 +98,8 @@ const machine = setup({
       },
     },
     dragging: {
+      entry: "applySelectNone",
+      exit: "removeSelectNone",
       invoke: {
         src: "moveObserver",
         onSnapshot: {
