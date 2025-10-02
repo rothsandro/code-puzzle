@@ -1,3 +1,7 @@
-body {
-  margin: 0;
+@import "tailwindcss";
+
+@layer base {
+  * {
+    @apply outline-offset-4;
+  }
 }
