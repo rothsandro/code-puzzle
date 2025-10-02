@@ -8,7 +8,7 @@ export default definePuzzle({
     "n =>",
     "/^",
     "(",
-    "d",
+    "\\d",
     ")",
     "\\1",
     "{2}",
@@ -16,6 +16,6 @@ export default definePuzzle({
     ".test(n)",
   ],
   solution: `
-    const isTripleNumber = n => /^(\d)\\1{2}$/.test(n)
+    const isTripleNumber = n => /^(\\d)\\1{2}$/.test(n)
   `,
 });
