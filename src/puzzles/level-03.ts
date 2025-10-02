@@ -4,18 +4,16 @@ export default definePuzzle({
   id: "03",
   title: "Level 3",
   pieces: [
-    "values",
-    ".map",
-    "(Number)",
-    ".filter",
-    "(Boolean)",
-    ".reduce",
-    "((a, b) => a + b)",
+    "setTimeout",
+    "(",
+    "console.log",
+    ",",
+    "1000",
+    ",",
+    '"Hello World"',
+    ")",
   ],
   solution: `
-    values
-      .map(Number)
-      .filter(Boolean)
-      .reduce((a, b) => a + b)
+    setTimeout(console.log, 1000, "Hello World")
   `,
 });
