@@ -34,6 +34,7 @@ export function useDragDrop(props: UseDragDropProps) {
             type: "drag.start",
             x: e.clientX,
             y: e.clientY,
+            pointerId: e.pointerId,
             el: e.currentTarget,
           });
         },
@@ -43,9 +44,12 @@ export function useDragDrop(props: UseDragDropProps) {
   };
 }
 
-const moveObserver = fromObservable<{ x: number; y: number }, void>(() =>
-  fromEvent<PointerEvent>(document, "pointermove").pipe(
-    takeUntil(fromEvent(document, "pointerup")),
+const moveObserver = fromObservable<
+  { x: number; y: number },
+  { el: HTMLElement }
+>(({ input }) =>
+  fromEvent<PointerEvent>(input.el, "pointermove").pipe(
+    takeUntil(fromEvent(input.el, "pointerup")),
     map((e) => ({ x: e.clientX, y: e.clientY }))
   )
 );
@@ -54,28 +58,37 @@ const machine = setup({
   types: {
     context: {} as {
       el: HTMLElement | null;
+      pointerId: number | null;
       start: { x: number; y: number };
       offset: { x: number; y: number };
     },
-    events: {} as { type: "drag.start"; x: number; y: number; el: HTMLElement },
+    events: {} as {
+      type: "drag.start";
+      x: number;
+      y: number;
+      pointerId: number;
+      el: HTMLElement;
+    },
   },
   actions: {
     move: (_, _offset: { x: number; y: number }) => undefined,
     resetTransform: (ctx) => ctx.context.el?.style.removeProperty("transform"),
+    capturePointer: (ctx) =>
+      ctx.context.el?.setPointerCapture(ctx.context.pointerId!),
+    releaseCapture: (ctx) =>
+      ctx.context.el?.releasePointerCapture(ctx.context.pointerId!),
     applyTransform: (ctx) => {
       ctx.context.el?.style.setProperty(
         "transform",
         `translate(${ctx.context.offset.x}px, ${ctx.context.offset.y}px)`
       );
     },
-
-    applySelectNone: () => document.body.classList.add("select-none"),
-    removeSelectNone: () => document.body.classList.remove("select-none"),
   },
   actors: { moveObserver },
 }).createMachine({
   context: {
     el: null,
+    pointerId: null,
     start: { x: 0, y: 0 },
     offset: { x: 0, y: 0 },
   },
@@ -84,24 +97,28 @@ const machine = setup({
     idle: {
       entry: assign({
         el: null,
+        pointerId: null,
         start: { x: 0, y: 0 },
         offset: { x: 0, y: 0 },
       }),
       on: {
         "drag.start": {
           target: "dragging",
-          actions: assign({
-            el: (ctx) => ctx.event.el,
-            start: (ctx) => ({ x: ctx.event.x, y: ctx.event.y }),
-          }),
+          actions: [
+            assign({
+              el: (ctx) => ctx.event.el,
+              pointerId: (ctx) => ctx.event.pointerId,
+              start: (ctx) => ({ x: ctx.event.x, y: ctx.event.y }),
+            }),
+            (e) => e.event.el.setPointerCapture(e.event.pointerId),
+          ],
         },
       },
     },
     dragging: {
-      entry: "applySelectNone",
-      exit: "removeSelectNone",
       invoke: {
         src: "moveObserver",
+        input: (ctx) => ({ el: ctx.context.el! }),
         onSnapshot: {
           guard: ({ event }) => !!event.snapshot.context,
           actions: [

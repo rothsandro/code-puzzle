@@ -19,7 +19,7 @@ export function CanvasPiece(props: CanvasPieceProps) {
         "absolute",
         "px-2 py-0.5 rounded-4xl",
         "font-mono text-slate-700",
-        "select-none whitespace-nowrap",
+        "select-none touch-none whitespace-nowrap",
         "transition-shadow duration-300",
         {
           "bg-gray-100": !isSolved,
